@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Week 3 – Server Status Report</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+            background-color: #000000;
+            background-image: url('https://i.pinimg.com/originals/8f/38/ab/8f38ab8eeadb926c788a4d17ec3321fc.gif');
+            background-repeat: repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #f8fafc;
+        }
+        header {
+            text-align: center;
+            background: #000000;
+            color: #f8fafc;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(255,255,255,0.1);
+            border: 2px solid #333333;
+            margin-bottom: 24px;
+        }
+        h1, h2, h3 {
+            color: #38bdf8;
+        }
+        h2 {
+            border-bottom: 2px solid #333333;
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        section {
+            margin: 24px 0;
+            padding: 28px;
+            background: #000000;
+            color: #f8fafc;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(255,255,255,0.1);
+            border: 2px solid #333333;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: #121212;
+            border-radius: 8px;
+            overflow: hidden;
+            color: #f8fafc;
+        }
+        th, td {
+            border: 1px solid #333333;
+            padding: 14px 18px;
+            text-align: left;
+        }
+        th {
+            background: #1e293b;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #1a1a1a;
+        }
+        code {
+            background: #334155;
+            color: #f8fafc;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #000000;
+            color: #38bdf8;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            border: 2px solid #333333;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background: #1e293b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.8);
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #cbd5e1;
+        }
+        a {
+            color: #38bdf8;
+        }
+        .note {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Server Status</h1>
+        <p>This is the final result of this week's work.</p>
+    </header>
+
+    <div class="btn-container">
+        <a href="/viikko2/" class="btn">&larr; Back to week 2 page</a>
+    </div>
+
+    <section>
+        <h2>Current status</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Information</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Report generated</th>
+                        <td>2026-11-22 17:50:01</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Server uptime</th>
+                        <td>up 1 day, 43 minutes</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Root filesystem disk usage</th>
+                        <td>4%</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Disk status</th>
+                        <td><strong>OK</strong></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Total RAM</th>
+                        <td>3814 MiB</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Available RAM</th>
+                        <td>3194 MiB</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top: 15px;">
+            Disk space status is <strong>OK</strong> below 80% usage
+            and <strong>WARNING</strong> at 80% or above.
+        </p>
+        <p class="note">
+            Bash generates this once per minute.
+            Wait 1–2 minutes then reload the page
+            to see a new time.
+        </p>
+    </section>
+
+    <section>
+        <h2>What commands did I use?</h2>
+        <ul>
+            <li>
+                <code>date '+%Y-%m-%d %H:%M:%S'</code> displays the current date, time and time zone.
+            </li>
+            <li>
+                <code>uptime -p</code> displays how long the server has been running.
+            </li>
+            <li>
+                <code>df -P / | awk 'NR==2 {print }'</code> extracts the root filesystem usage percentage.
+            </li>
+            <li>
+                <code>free -m</code> displays memory information in mebibytes.
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>How the script works</h2>
+        <p>
+            It collects information using Linux commands and stores the results in Bash variables.
+            An <code>if</code> statement checks whether root disk usage is at least 80% to set
+            <code>WARNING</code> or <code>OK</code>.
+        </p>
+        <p>
+            The script writes to a temporary file first and moves it into place as <code>index.html</code>.
+            Nginx serves this file at <code>/viikko3/</code>.
+        </p>
+    </section>
+
+    <section>
+        <h2>Scheduling</h2>
+        <p>
+            A cron job runs the script once every minute so the status page stays current automatically.
+        </p>
+    </section>
+
+    <section>
+        <h2>Test results</h2>
+        <h3>Syntax check</h3>
+        <p>
+            Syntax verified with <code>bash -n</code> and tested by running the script directly to generate the HTML output.
+        </p>
+        <h3>Disk space status</h3>
+        <p>
+            Threshold logic checked for usage below 80% (<code>OK</code>) and 80% or above (<code>WARNING</code>).
+        </p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Test input</th>
+                        <th scope="col">Expected status</th>
+                        <th scope="col">Actual status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>50%</td>
+                        <td>OK</td>
+                        <td>OK</td>
+                    </tr>
+                    <tr>
+                        <td>80%</td>
+                        <td>WARNING</td>
+                        <td>WARNING</td>
+                    </tr>
+                    <tr>
+                        <td>90%</td>
+                        <td>WARNING</td>
+                        <td>WARNING</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h3>Automatic updates</h3>
+        <p>
+            Timestamp updates verified across scheduled runs.
+        </p>
+        <h3>Reboot test</h3>
+        <p>
+            Nginx serves the generated page cleanly after startup.
+        </p>
+    </section>
+
+    <section>
+        <h2>Problems and lessons</h2>
+        <p>
+            Storing command outputs in variables and using a temporary file before moving it into place
+            prevents literal command strings and partial reads during updates.
+        </p>
+    </section>
+
+    <div class="btn-container">
+        <a href="https://github.com/MikaelNorrbacka/linux-kurssi-palautukset" class="btn">View the source code on GitHub</a>
+    </div>
+
+    <footer>
+        <p>Dashboard</p>
+    </footer>
+</body>
+</html>

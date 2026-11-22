@@ -1,10 +1,28 @@
 #!/bin/bash
+set -e
+OUT_FILE="/var/www/html/viikko3/index.html"
+mkdir -p "$(dirname "$OUT_FILE")"
+TMP_FILE="$(mktemp)"
 
-cat << EOF > /var/www/html/viikko3/index.html
+GENERATED="$(date '+%Y-%m-%d %H:%M:%S')"
+UPTIME="$(uptime -p)"
+DISK_RAW="$(df -P / | awk 'NR==2 {print $5}')"
+DISK_NUM="${DISK_RAW%%%}"
+
+if [ "${DISK_NUM:-0}" -ge 80 ]; then
+    DISK_STATUS="WARNING"
+else
+    DISK_STATUS="OK"
+fi
+
+RAM_TOTAL="$(free -m | awk '/^Mem:/ {print $2}')"
+RAM_AVAIL="$(free -m | awk '/^Mem:/ {print $7}')"
+
+cat << HTML_EOF > "$TMP_FILE"
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+<meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Week 3 – Server Status Report</title>
     <style>
@@ -144,27 +162,27 @@ cat << EOF > /var/www/html/viikko3/index.html
                 <tbody>
                     <tr>
                         <th scope="row">Report generated</th>
-                        <td>$(date '+%Y-%m-%d %H:%M:%S')</td>
+                        <td>${GENERATED}</td>
                     </tr>
                     <tr>
                         <th scope="row">Server uptime</th>
-                        <td>$(uptime -p)</td>
+                        <td>${UPTIME}</td>
                     </tr>
                     <tr>
                         <th scope="row">Root filesystem disk usage</th>
-                        <td>$(df / | awk 'NR==2 {print $5}')</td>
+                        <td>${DISK_RAW}</td>
                     </tr>
                     <tr>
                         <th scope="row">Disk status</th>
-                        <td><strong>OK</strong></td>
+                        <td><strong>${DISK_STATUS}</strong></td>
                     </tr>
                     <tr>
                         <th scope="row">Total RAM</th>
-                        <td>$(free -m | awk '/Mem:/ {print $2}') MiB</td>
+                        <td>${RAM_TOTAL} MiB</td>
                     </tr>
                     <tr>
                         <th scope="row">Available RAM</th>
-                        <td>$(free -m | awk '/Mem:/ {print $7}') MiB</td>
+                        <td>${RAM_AVAIL} MiB</td>
                     </tr>
                 </tbody>
             </table>
@@ -184,47 +202,37 @@ cat << EOF > /var/www/html/viikko3/index.html
         <h2>What commands did I use?</h2>
         <ul>
             <li>
-                date code which displays the current date, time and time zone
-                using the format specified in the script.
+                <code>date '+%Y-%m-%d %H:%M:%S'</code> displays the current date, time and time zone.
             </li>
             <li>
-                uptime code which displays how long the server has been running.
+                <code>uptime -p</code> displays how long the server has been running.
             </li>
             <li>
-                df -P / | awk 'NR == 2 {print \$5}' that passes filesystem information to awk, which extracts
-                the usage percentage from the second row.
+                <code>df -P / | awk 'NR==2 {print $5}'</code> extracts the root filesystem usage percentage.
             </li>
             <li>
-                free -m which displays memory information in mebibytes.
+                <code>free -m</code> displays memory information in mebibytes.
             </li>
         </ul>
     </section>
+
     <section>
         <h2>How the script works</h2>
         <p>
-            It collects information using Linux commands
-            and stores the results in Bash variables through command
-            substitution. A function uses an if statement to determine
-            the disk space status.
+            It collects information using Linux commands and stores the results in Bash variables.
+            An <code>if</code> statement checks whether root disk usage is at least 80% to set
+            <code>WARNING</code> or <code>OK</code>.
         </p>
         <p>
-            The script generates a temporary HTML file and then moves
-            the completed file into place as index.html.
-            Nginx serves this file at /viikko3/.
-        </p>
-        <p>
-            The disk space function checks if usage is under 80% or above.
-            For piping, the script uses df / | awk 'NR==2 {print $5}'
-            to pass storage statistics into awk to extract the percentage.
+            The script writes to a temporary file first and moves it into place as <code>index.html</code>.
+            Nginx serves this file at <code>/viikko3/</code>.
         </p>
     </section>
 
     <section>
         <h2>Scheduling</h2>
         <p>
-            I configured a cron job to execute the script once every minute.
-            The scheduling persists automatically after a reboot,
-            ensuring that the status report continues to refresh without any manual intervention.
+            A cron job runs the script once every minute so the status page stays current automatically.
         </p>
     </section>
 
@@ -232,15 +240,11 @@ cat << EOF > /var/www/html/viikko3/index.html
         <h2>Test results</h2>
         <h3>Syntax check</h3>
         <p>
-            Before running the script live, I performed a syntax check using bash -n week3, which returned no errors.
-            Executing the script manually updated the HTML report instantly,
-            showing the latest system metrics without any issues.
+            Syntax verified with <code>bash -n</code> and tested by running the script directly to generate the HTML output.
         </p>
         <h3>Disk space status</h3>
         <p>
-            I tested the status threshold logic by temporarily adjusting the input values in the script to verify
-            how it handles different disk usage levels.
-            The logic successfully evaluated lower usage as normal and higher percentages as warnings.
+            Threshold logic checked for usage below 80% (<code>OK</code>) and 80% or above (<code>WARNING</code>).
         </p>
         <div class="table-container">
             <table>
@@ -272,24 +276,24 @@ cat << EOF > /var/www/html/viikko3/index.html
         </div>
         <h3>Automatic updates</h3>
         <p>
-            I monitored the report's generation timestamp across multiple minutes.
-            The script refreshed the page automatically on schedule, confirmed by consecutive timestamps.
+            Timestamp updates verified across scheduled runs.
         </p>
         <h3>Reboot test</h3>
         <p>
-            Both the Week 2 web application and this Week 3 status report loaded correctly through Nginx.
-            The background automation resumed seamlessly right after startup.
+            Nginx serves the generated page cleanly after startup.
         </p>
     </section>
 
     <section>
         <h2>Problems and lessons</h2>
-        <p>I encountered an issue where dynamic commands like date and uptime were printed as literal text.
-        Additionally, I learned to clearly separate the execution script from the generated HTML file to avoid syntax errors.</p>
+        <p>
+            Storing command outputs in variables and using a temporary file before moving it into place
+            prevents literal command strings and partial reads during updates.
+        </p>
     </section>
 
     <div class="btn-container">
-        <a href="https://github.com" class="btn">View the source code on GitHub</a>
+        <a href="https://github.com/MikaelNorrbacka/linux-kurssi-palautukset" class="btn">View the source code on GitHub</a>
     </div>
 
     <footer>
@@ -297,4 +301,5 @@ cat << EOF > /var/www/html/viikko3/index.html
     </footer>
 </body>
 </html>
-EOF
+HTML_EOF
+mv "$TMP_FILE" "$OUT_FILE"
