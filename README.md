@@ -1,4 +1,4 @@
-# Linux Course Submissions (Server B / Week 4)
+# Course Submissions about Server B  (Week 4 Assignment)
 
 This repository contains the backup script, cron schedule, MariaDB replication configuration, and read-only Week 4 web page for `nginx-serverb'.
 
